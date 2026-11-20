@@ -116,6 +116,7 @@ The host needs tzdata with the `Europe/Helsinki` zone. If that package is missin
 
 - All data (price forecasts, wind power, and realized prices) is shown from beginning of today (Helsinki time) onwards.
 - The dedicated extra fees number lets you overlay grid fees or markups in cents per kWh; the value is reflected in price sensor states, cheapest windows, and their `extra_fees` attributes.
+- In **Configure**, set **Off-peak forecast adjustment (c/kWh)** to add a signed amount to forecast prices from 22:00 inclusive to 07:00 exclusive, Helsinki time. The default is `0.0`; enter `-1.77` to subtract 1.77 c/kWh. This is separate from the standard fee and does not change realized prices or wind forecasts.
 - Daily averages sensor keeps a running list of full Helsinki days (00:00-23:00) with their averaged prices and the underlying hourly points for dashboard tables or charts.
 - Sähkötin CSV data for the current Helsinki day is merged with Nordpool Predict FI forecasts, so the `forecast` attribute already contains realized + predicted prices in one timeline.
 - The price sensor also exposes `forecast_start`, the first forecast hour after realized data, so dashboards can mark where predictions kick in.

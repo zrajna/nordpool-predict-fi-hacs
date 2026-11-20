@@ -30,7 +30,8 @@
         "description": "Justera uppdateringsintervall eller bas-URL.",
         "data": {
           "base_url": "Bas-URL",
-          "update_interval": "Uppdateringsintervall (minuter)"
+          "update_interval": "Uppdateringsintervall (minuter)",
+          "extra_fee_offpeak": "Nattjustering för prisprognosen (c/kWh)"
         }
       }
     },

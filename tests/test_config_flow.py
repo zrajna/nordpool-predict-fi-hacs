@@ -9,6 +9,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.nordpool_predict_fi.const import (
     CONF_BASE_URL,
+    CONF_EXTRA_FEE_OFFPEAK,
     CONF_UPDATE_INTERVAL,
     DEFAULT_BASE_URL,
     DEFAULT_UPDATE_INTERVAL_MINUTES,
@@ -31,6 +32,7 @@ async def test_full_config_flow(hass: HomeAssistant, enable_custom_integrations,
         context={"source": config_entries.SOURCE_USER},
     )
     assert result["type"] == FlowResultType.FORM
+    assert CONF_EXTRA_FEE_OFFPEAK not in result["data_schema"]({})
 
     user_input = {
         CONF_BASE_URL: DEFAULT_BASE_URL,
@@ -70,10 +72,12 @@ async def test_options_flow(hass: HomeAssistant, enable_custom_integrations, mon
 
     result = await hass.config_entries.options.async_init(entry.entry_id)
     assert result["type"] == FlowResultType.FORM
+    assert result["data_schema"]({})[CONF_EXTRA_FEE_OFFPEAK] == 0.0
 
     updated = {
         CONF_BASE_URL: f"{DEFAULT_BASE_URL}/alt",
         CONF_UPDATE_INTERVAL: 45,
+        CONF_EXTRA_FEE_OFFPEAK: -1.77,
     }
     result = await hass.config_entries.options.async_configure(
         result["flow_id"],
@@ -83,6 +87,9 @@ async def test_options_flow(hass: HomeAssistant, enable_custom_integrations, mon
     assert result["type"] == FlowResultType.CREATE_ENTRY
     assert entry.options[CONF_BASE_URL] == f"{DEFAULT_BASE_URL}/alt"
     assert entry.options[CONF_UPDATE_INTERVAL] == 45
+    assert entry.options[CONF_EXTRA_FEE_OFFPEAK] == -1.77
+    reopened = await hass.config_entries.options.async_init(entry.entry_id)
+    assert reopened["data_schema"]({})[CONF_EXTRA_FEE_OFFPEAK] == -1.77
 
 
 async def test_user_flow_invalid_url(hass: HomeAssistant, enable_custom_integrations) -> None:

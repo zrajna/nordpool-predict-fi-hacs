@@ -9,9 +9,19 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
-from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import config_validation as cv, selector
 
-from .const import CONF_BASE_URL, CONF_UPDATE_INTERVAL, DEFAULT_BASE_URL, DEFAULT_UPDATE_INTERVAL_MINUTES, DOMAIN
+from .const import (
+    CONF_BASE_URL,
+    CONF_EXTRA_FEE_OFFPEAK,
+    CONF_UPDATE_INTERVAL,
+    DEFAULT_BASE_URL,
+    DEFAULT_EXTRA_FEES_CENTS,
+    DEFAULT_UPDATE_INTERVAL_MINUTES,
+    DOMAIN,
+    MAX_EXTRA_FEES_CENTS,
+    MIN_EXTRA_FEES_CENTS,
+)
 
 
 #region _flow
@@ -94,7 +104,25 @@ class NordpoolPredictOptionsFlow(config_entries.OptionsFlow):
         else:
             defaults = _entry_to_defaults(self._entry)
 
-        return self.async_show_form(step_id="init", data_schema=_form_schema(defaults), errors=errors)
+        schema = _form_schema(defaults).extend(
+            {
+                vol.Optional(
+                    CONF_EXTRA_FEE_OFFPEAK,
+                    default=defaults.get(
+                        CONF_EXTRA_FEE_OFFPEAK,
+                        self._entry.options.get(CONF_EXTRA_FEE_OFFPEAK, DEFAULT_EXTRA_FEES_CENTS),
+                    ),
+                ): selector.NumberSelector(
+                    selector.NumberSelectorConfig(
+                        min=MIN_EXTRA_FEES_CENTS,
+                        max=MAX_EXTRA_FEES_CENTS,
+                        step=0.01,
+                        mode=selector.NumberSelectorMode.BOX,
+                    )
+                )
+            }
+        )
+        return self.async_show_form(step_id="init", data_schema=schema, errors=errors)
 
 
 #region _forms

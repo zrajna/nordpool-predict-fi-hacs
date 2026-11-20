@@ -16,6 +16,7 @@ DEFAULT_UPDATE_INTERVAL = timedelta(minutes=DEFAULT_UPDATE_INTERVAL_MINUTES)
 CONF_BASE_URL = "base_url"
 CONF_UPDATE_INTERVAL = "update_interval"
 CONF_EXTRA_FEES = "extra_fees"
+CONF_EXTRA_FEE_OFFPEAK = "extra_fee_offpeak"
 
 DATA_COORDINATOR = "coordinator"
 DATA_UNSUB_LISTENER = "unsub_listener"

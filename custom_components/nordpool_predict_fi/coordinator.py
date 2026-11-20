@@ -88,6 +88,8 @@ class NordpoolPredictCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         base_url: str,
         update_interval,
         extra_fees_cents: float | None = None,
+        *,
+        extra_fee_offpeak: float = DEFAULT_EXTRA_FEES_CENTS,
     ) -> None:
         super().__init__(
             hass,
@@ -98,6 +100,7 @@ class NordpoolPredictCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.entry_id = entry_id
         self._base_url = base_url or DEFAULT_BASE_URL
         self._helsinki_tz: tzinfo | None = None
+        self._extra_fee_offpeak = extra_fee_offpeak
         self._extra_fees_cents = (
             float(extra_fees_cents)
             if extra_fees_cents is not None
@@ -252,7 +255,9 @@ class NordpoolPredictCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             prediction_rows = await self._fetch_json(session, "prediction.json")
         except FileNotFoundError as err:
             raise UpdateFailed(f"prediction.json missing at {err}") from err
-        forecast_series = self._series_from_rows(prediction_rows)
+        forecast_series = self._series_from_rows(
+            prediction_rows, offpeak_fee=self._extra_fee_offpeak
+        )
         
 
         
@@ -510,7 +515,9 @@ class NordpoolPredictCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         return f"{self._base_url}/{suffix}"
 
     #region _parse
-    def _series_from_rows(self, rows: list[Any]) -> list[SeriesPoint]:
+    def _series_from_rows(
+        self, rows: list[Any], *, offpeak_fee: float = DEFAULT_EXTRA_FEES_CENTS
+    ) -> list[SeriesPoint]:
         series: list[SeriesPoint] = []
         for row in rows or []:
             if not isinstance(row, (list, tuple)) or len(row) < 2:
@@ -519,9 +526,10 @@ class NordpoolPredictCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             value = self._safe_float(row[1])
             if timestamp is None or value is None:
                 continue
-            hour = timestamp.astimezone(self._get_helsinki_timezone()).hour
-            if hour >= 22 or hour < 7:
-                value -= 1.77
+            if offpeak_fee:
+                hour = timestamp.astimezone(self._get_helsinki_timezone()).hour
+                if hour >= 22 or hour < 7:
+                    value += offpeak_fee
             series.append(SeriesPoint(datetime=timestamp, value=value))
         series.sort(key=lambda item: item.datetime)
         return series

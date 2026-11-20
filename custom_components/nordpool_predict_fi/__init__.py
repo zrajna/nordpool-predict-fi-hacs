@@ -15,6 +15,7 @@ from homeassistant.helpers.typing import ConfigType
 from .const import (
     CONF_BASE_URL,
     CONF_EXTRA_FEES,
+    CONF_EXTRA_FEE_OFFPEAK,
     CONF_UPDATE_INTERVAL,
     DATA_COORDINATOR,
     DATA_UNSUB_LISTENER,
@@ -49,6 +50,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: NordpoolConfigEntry) -> 
         base_url=runtime_config[CONF_BASE_URL],
         update_interval=runtime_config[CONF_UPDATE_INTERVAL],
         extra_fees_cents=runtime_config[CONF_EXTRA_FEES],
+        extra_fee_offpeak=entry.options.get(CONF_EXTRA_FEE_OFFPEAK, DEFAULT_EXTRA_FEES_CENTS),
     )
 
     await coordinator.async_config_entry_first_refresh()

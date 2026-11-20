@@ -30,7 +30,8 @@
         "description": "Muuta päivitysväliä tai osoitetta.",
         "data": {
           "base_url": "Osoite",
-          "update_interval": "Päivitysväli (minuuttia)"
+          "update_interval": "Päivitysväli (minuuttia)",
+          "extra_fee_offpeak": "Hintaennusteen yöajan korjaus (snt/kWh)"
         }
       }
     },

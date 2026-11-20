@@ -778,6 +778,19 @@ def _coordinator(hass) -> NordpoolPredictCoordinator:
     )
 
 
+async def test_offpeak_fee_adjusts_only_overnight_rows(hass) -> None:
+    coordinator = _coordinator(hass)
+    afternoon = datetime.fromisoformat("2026-07-01T18:00:00+00:00")
+    rows = [
+        [(afternoon + timedelta(hours=offset)).timestamp() * 1000, 10.0]
+        for offset in (0, 1, 9, 10)
+    ]
+
+    assert [point.value for point in coordinator._series_from_rows(rows)] == [10.0] * 4
+    adjusted = coordinator._series_from_rows(rows, offpeak_fee=-1.77)
+    assert [point.value for point in adjusted] == pytest.approx([10.0, 8.23, 8.23, 10.0])
+
+
 def test_find_cheapest_window_requires_hourly_sequence(hass, enable_custom_integrations) -> None:
     coordinator = _coordinator(hass)
     base = datetime(2024, 1, 1, tzinfo=timezone.utc)

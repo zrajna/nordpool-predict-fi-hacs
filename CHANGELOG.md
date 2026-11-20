@@ -2,6 +2,10 @@
 
 All notable changes to this project are documented here. This project follows the Common Changelog style (common-changelog.org).
 
+## 2026-11-20
+### Changed
+- Made the off-peak forecast price adjustment configurable, with a default of zero.
+
 ## 2026-07-11
 ### Fixed
 - Price cards, legends, and the hourly calendar now use lime green for the cheapest price band and lime for the next band.

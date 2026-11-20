@@ -30,7 +30,8 @@
         "description": "Adjust polling interval or base URL.",
         "data": {
           "base_url": "Base URL",
-          "update_interval": "Update interval (minutes)"
+          "update_interval": "Update interval (minutes)",
+          "extra_fee_offpeak": "Off-peak forecast adjustment (c/kWh)"
         }
       }
     },

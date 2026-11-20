@@ -3,6 +3,9 @@
 All notable changes to this project are documented here. This project follows the Common Changelog style (common-changelog.org).
 
 ## 2026-11-20
+### Added
+- A current-price sensor in EUR/kWh with three decimal places.
+
 ### Fixed
 - Initial setup accepts defaults without requiring field values, and Reconfigure updates the existing entry without clearing the off-peak adjustment.
 

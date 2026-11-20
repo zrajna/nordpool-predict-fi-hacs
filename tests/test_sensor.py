@@ -320,7 +320,7 @@ async def test_async_setup_entry_registers_entities(hass, enable_custom_integrat
     await sensor.async_setup_entry(hass, entry, _add_entities)
 
     expected_entity_count = (
-        7  # Price, Price Now, Daily Average, and 4 next hour sensors
+        8  # Price, Price Now in cents and EUR, Daily Average, and 4 next hour sensors
         + 2  # NordpoolWindpowerSensor and NordpoolWindpowerNowSensor
         + 2 * len(CHEAPEST_WINDOW_HOURS)  # Cheapest window value + active sensors
         + 2  # Custom window value + active sensors
@@ -329,6 +329,7 @@ async def test_async_setup_entry_registers_entities(hass, enable_custom_integrat
     assert len(added) == expected_entity_count
     assert sum(isinstance(entity, sensor.NordpoolPriceSensor) for entity in added) == 1
     assert sum(isinstance(entity, sensor.NordpoolPriceNowSensor) for entity in added) == 1
+    assert sum(isinstance(entity, sensor.NordpoolPriceNowEurSensor) for entity in added) == 1
     assert sum(isinstance(entity, sensor.NordpoolPriceDailyAverageSensor) for entity in added) == 1
     assert sum(isinstance(entity, sensor.NordpoolWindpowerSensor) for entity in added) == 1
     assert sum(isinstance(entity, sensor.NordpoolWindpowerNowSensor) for entity in added) == 1
@@ -341,6 +342,7 @@ async def test_async_setup_entry_registers_entities(hass, enable_custom_integrat
     allowed_types = (
         sensor.NordpoolPriceSensor,
         sensor.NordpoolPriceNowSensor,
+        sensor.NordpoolPriceNowEurSensor,
         sensor.NordpoolPriceDailyAverageSensor,
         sensor.NordpoolPriceNextHoursSensor,
         sensor.NordpoolWindpowerSensor,
@@ -1138,6 +1140,12 @@ async def test_price_entities_apply_extra_fees(hass, enable_custom_integrations)
     now_attrs = price_now.extra_state_attributes
     assert price_now.native_value == pytest.approx(round(current_point.value + extra_fee, 1))
     assert now_attrs[ATTR_EXTRA_FEES] == pytest.approx(extra_fee)
+    price_now_eur = next(entity for entity in added if isinstance(entity, sensor.NordpoolPriceNowEurSensor))
+    assert price_now_eur.native_value == pytest.approx(0.175)
+    assert price_now_eur.native_unit_of_measurement == "EUR/kWh"
+    assert price_now_eur.suggested_display_precision == 3
+    assert price_now_eur.unique_id == f"{entry.entry_id}_price_now_eur"
+    assert price_now_eur.extra_state_attributes == now_attrs
 
     daily_sensor = next(
         entity for entity in added if isinstance(entity, sensor.NordpoolPriceDailyAverageSensor)
@@ -1432,7 +1440,7 @@ async def test_async_setup_entry_handles_missing_wind_data(hass, enable_custom_i
 
     added: list[sensor.NordpoolBaseSensor] = []
     expected_entity_count = (
-        7  # price sensors + daily + next hour sensors
+        8  # price sensors + daily + next hour sensors
         + 2  # wind sensors still registered
         + 2 * len(CHEAPEST_WINDOW_HOURS)
         + 2  # custom window value + active sensors
@@ -1464,6 +1472,8 @@ async def test_async_setup_entry_handles_missing_wind_data(hass, enable_custom_i
     price_now = next(entity for entity in added if isinstance(entity, sensor.NordpoolPriceNowSensor))
     price_now_attrs = price_now.extra_state_attributes
     assert price_now.native_value is None
+    price_now_eur = next(entity for entity in added if isinstance(entity, sensor.NordpoolPriceNowEurSensor))
+    assert price_now_eur.native_value is None
     assert price_now_attrs[ATTR_TIMESTAMP] is None
     assert price_now_attrs[ATTR_RAW_SOURCE] == "https://example.com/deploy"
     assert price_now_attrs[ATTR_EXTRA_FEES] == pytest.approx(0.0)
@@ -1594,6 +1604,7 @@ async def test_async_setup_entry_handles_missing_wind_data(hass, enable_custom_i
     allowed_types = (
         sensor.NordpoolPriceSensor,
         sensor.NordpoolPriceNowSensor,
+        sensor.NordpoolPriceNowEurSensor,
         sensor.NordpoolPriceDailyAverageSensor,
         sensor.NordpoolPriceNextHoursSensor,
         sensor.NordpoolWindpowerSensor,

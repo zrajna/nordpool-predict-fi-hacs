@@ -67,6 +67,7 @@ async def async_setup_entry(
     entities: list[SensorEntity] = [
         NordpoolPriceSensor(coordinator, entry),
         NordpoolPriceNowSensor(coordinator, entry),
+        NordpoolPriceNowEurSensor(coordinator, entry),
         NordpoolPriceDailyAverageSensor(coordinator, entry),
     ]
     entities.extend(
@@ -284,16 +285,13 @@ class NordpoolPriceSensor(NordpoolBaseSensor):
 
 
 #region _price_now
-class NordpoolPriceNowSensor(NordpoolBaseSensor):
-    _attr_translation_key = "price_now"
+class _NordpoolPriceNowBaseSensor(NordpoolBaseSensor):
     _attr_icon = "mdi:cash-clock"
-    _attr_native_unit_of_measurement = "c/kWh"
     _attr_state_class = SensorStateClass.MEASUREMENT
 
     def __init__(self, coordinator: NordpoolPredictCoordinator, entry: ConfigEntry) -> None:
         super().__init__(coordinator, entry)
-        self._attr_unique_id = f"{entry.entry_id}_price_now"
-        self._attr_name = "Price Now"
+        self._attr_unique_id = f"{entry.entry_id}_{self._attr_translation_key}"
 
     @property
     def native_value(self) -> float | None:
@@ -325,6 +323,24 @@ class NordpoolPriceNowSensor(NordpoolBaseSensor):
             else:
                 break
         return latest
+
+
+class NordpoolPriceNowSensor(_NordpoolPriceNowBaseSensor):
+    _attr_translation_key = "price_now"
+    _attr_name = "Price Now"
+    _attr_native_unit_of_measurement = "c/kWh"
+
+
+class NordpoolPriceNowEurSensor(_NordpoolPriceNowBaseSensor):
+    _attr_translation_key = "price_now_eur"
+    _attr_name = "Price Now EUR"
+    _attr_native_unit_of_measurement = "EUR/kWh"
+    _attr_suggested_display_precision = 3
+
+    @property
+    def native_value(self) -> float | None:
+        cents = super().native_value
+        return round(cents / 100, 3) if cents is not None else None
 
 
 #region _price_daily

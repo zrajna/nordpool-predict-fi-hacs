@@ -74,6 +74,9 @@
       "price_now": {
         "name": "Pris nu"
       },
+      "price_now_eur": {
+        "name": "Pris nu (EUR)"
+      },
       "price_daily_average": {
         "name": "Dagligt genomsnittspris"
       },

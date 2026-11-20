@@ -74,6 +74,9 @@
       "price_now": {
         "name": "Price Now"
       },
+      "price_now_eur": {
+        "name": "Price Now EUR"
+      },
       "price_daily_average": {
         "name": "Daily Average Price"
       },

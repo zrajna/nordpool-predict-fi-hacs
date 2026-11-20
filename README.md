@@ -67,6 +67,7 @@ Manual card snippets live in docs — see [`docs/README.md`](docs/README.md) for
 | --- | --- | --- |
 | `sensor.nordpool_predict_fi_price` | Sensor | Continuous hourly price timeline (`c/kWh`) built from Sähkötin realizations + Nordpool Predict forecasts. |
 | `sensor.nordpool_predict_fi_price_now` | Sensor | Latest price value at or before the current hour, plus the timestamp it originated from. |
+| `sensor.nordpool_predict_fi_price_now_eur` | Sensor | The same current price in EUR/kWh, displayed to three decimal places by default. |
 | `sensor.nordpool_predict_fi_price_daily_average` | Sensor | Average price across all full Helsinki days currently available; attributes include per-day breakdowns plus `daily_average_span_start`/`daily_average_span_end` to mark the aggregated window. |
 | `sensor.nordpool_predict_fi_price_next_1h` | Sensor | Average price for the next starting 1 hour. |
 | `sensor.nordpool_predict_fi_price_next_3h` | Sensor | Average price for the next 3 hours. |

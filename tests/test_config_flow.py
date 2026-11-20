@@ -34,13 +34,9 @@ async def test_full_config_flow(hass: HomeAssistant, enable_custom_integrations,
     assert result["type"] == FlowResultType.FORM
     assert CONF_EXTRA_FEE_OFFPEAK not in result["data_schema"]({})
 
-    user_input = {
-        CONF_BASE_URL: DEFAULT_BASE_URL,
-        CONF_UPDATE_INTERVAL: DEFAULT_UPDATE_INTERVAL_MINUTES,
-    }
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
-        user_input=user_input,
+        user_input={},
     )
 
     assert result["type"] == FlowResultType.CREATE_ENTRY
@@ -186,7 +182,7 @@ async def test_reconfigure_flow_prefills_defaults(hass: HomeAssistant, enable_cu
 
 
 async def test_reconfigure_flow_updates_entry(hass: HomeAssistant, enable_custom_integrations, monkeypatch) -> None:
-    """Reconfigure flow should normalize values before returning data."""
+    """Reconfigure updates the existing entry and preserves the off-peak option."""
     monkeypatch.setattr(
         "custom_components.nordpool_predict_fi.async_setup_entry",
         AsyncMock(return_value=True),
@@ -202,7 +198,7 @@ async def test_reconfigure_flow_updates_entry(hass: HomeAssistant, enable_custom
         data={
             CONF_BASE_URL: DEFAULT_BASE_URL,
         },
-        options={},
+        options={CONF_BASE_URL: f"{DEFAULT_BASE_URL}/old", CONF_EXTRA_FEE_OFFPEAK: -1.77},
     )
     entry.add_to_hass(hass)
 
@@ -223,7 +219,8 @@ async def test_reconfigure_flow_updates_entry(hass: HomeAssistant, enable_custom
         },
     )
 
-    assert result["type"] == FlowResultType.CREATE_ENTRY
-    assert result["title"] == entry.title
-    assert result["data"][CONF_BASE_URL] == f"{DEFAULT_BASE_URL}/custom"
-    assert result["data"][CONF_UPDATE_INTERVAL] == 120
+    assert result["type"] == FlowResultType.ABORT
+    assert result["reason"] == "reconfigure_successful"
+    assert entry.data[CONF_BASE_URL] == f"{DEFAULT_BASE_URL}/custom"
+    assert entry.data[CONF_UPDATE_INTERVAL] == 120
+    assert entry.options == {CONF_EXTRA_FEE_OFFPEAK: -1.77}

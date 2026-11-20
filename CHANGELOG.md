@@ -3,6 +3,9 @@
 All notable changes to this project are documented here. This project follows the Common Changelog style (common-changelog.org).
 
 ## 2026-11-20
+### Fixed
+- Initial setup accepts defaults without requiring field values, and Reconfigure updates the existing entry without clearing the off-peak adjustment.
+
 ### Changed
 - Made the off-peak forecast price adjustment configurable, with a default of zero.
 

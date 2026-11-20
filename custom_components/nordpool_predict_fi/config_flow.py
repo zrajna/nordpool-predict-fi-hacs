@@ -60,8 +60,11 @@ class NordpoolPredictConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data, errors = _validate_user_input(user_input)
             defaults = data
             if not errors:
-                await self.async_set_unique_id(entry.unique_id or DOMAIN)
-                return self.async_create_entry(title=entry.title, data=data)
+                return self.async_update_reload_and_abort(
+                    entry,
+                    data_updates=data,
+                    options={key: value for key, value in entry.options.items() if key not in data},
+                )
 
         return self.async_show_form(
             step_id="reconfigure",
@@ -130,8 +133,8 @@ def _form_schema(defaults: Mapping[str, Any] | None = None) -> vol.Schema:
     defaults = defaults or {}
     return vol.Schema(
         {
-            vol.Required(CONF_BASE_URL, default=defaults.get(CONF_BASE_URL, DEFAULT_BASE_URL)): str,
-            vol.Required(
+            vol.Optional(CONF_BASE_URL, default=defaults.get(CONF_BASE_URL, DEFAULT_BASE_URL)): str,
+            vol.Optional(
                 CONF_UPDATE_INTERVAL,
                 default=defaults.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL_MINUTES),
             ): vol.All(vol.Coerce(int), vol.Range(min=1, max=720)),

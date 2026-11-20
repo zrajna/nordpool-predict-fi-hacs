@@ -519,6 +519,9 @@ class NordpoolPredictCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             value = self._safe_float(row[1])
             if timestamp is None or value is None:
                 continue
+            hour = timestamp.astimezone(self._get_helsinki_timezone()).hour
+            if hour >= 22 or hour < 7:
+                value -= 1.77
             series.append(SeriesPoint(datetime=timestamp, value=value))
         series.sort(key=lambda item: item.datetime)
         return series
